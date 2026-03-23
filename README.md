@@ -5,6 +5,11 @@ Azure Entra ID 대신 Keycloak을 Mock IdP로 사용하여 SAML 2.0 페더레이
 
 ## Architecture
 
+![Architecture Diagram](architecture.png)
+
+<details>
+<summary>Text version</summary>
+
 ```
 [Keycloak Mock IdP] --SAML 2.0 (HTTPS)--> [AWS IAM SAML Provider] --> [IAM Roles (3)]
    (TLS, port 8443)    (Assertion Encrypted)   (SourceIp restricted)    Admin/Analyst/ReadOnly
@@ -12,6 +17,7 @@ Azure Entra ID 대신 Keycloak을 Mock IdP로 사용하여 SAML 2.0 페더레이
 [SageMaker Notebook] --Private Subnet--> [VPC Endpoints] --> [HealthOmics APIs]
      (ml.t3.medium)                      (5x Interface)      (Workflows/Storage/Analytics)
 ```
+</details>
 
 ## Key Features
 

@@ -1,0 +1,256 @@
+<mxGraphModel dx="1422" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+  <root>
+    <mxCell id="0"/>
+    <mxCell id="1" parent="0"/>
+
+    <!-- Title -->
+    <mxCell id="title" value="AWS HealthOmics VPC Integration Architecture" style="text;html=1;fontSize=20;fontStyle=1;fillColor=none;strokeColor=none;fontColor=#333333;align=center;" vertex="1" parent="1">
+      <mxGeometry x="400" y="20" width="500" height="40" as="geometry"/>
+    </mxCell>
+
+    <!-- AWS Cloud boundary -->
+    <mxCell id="aws-cloud" value="AWS Cloud" style="swimlane;startSize=30;fillColor=#F5F5F5;strokeColor=#666666;fontStyle=1;fontSize=14;fontColor=#333333;rounded=1;arcSize=5;swimlaneLine=0;container=1;pointerEvents=0;" vertex="1" parent="1">
+      <mxGeometry x="320" y="80" width="1220" height="880" as="geometry"/>
+    </mxCell>
+
+    <!-- IAM Section -->
+    <mxCell id="iam-box" value="AWS IAM" style="swimlane;startSize=25;fillColor=#FFF2CC;strokeColor=#D6B656;fontStyle=1;fontSize=12;rounded=1;arcSize=8;container=1;pointerEvents=0;" vertex="1" parent="aws-cloud">
+      <mxGeometry x="30" y="50" width="350" height="370" as="geometry"/>
+    </mxCell>
+
+    <!-- SAML Provider -->
+    <mxCell id="saml-provider" value="SAML Provider&#xa;AzureEntraMock-Keycloak" style="rounded=1;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=1;" vertex="1" parent="iam-box">
+      <mxGeometry x="90" y="35" width="180" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- IAM Roles -->
+    <mxCell id="role-admin" value="HealthOmics-SAML-Admin&#xa;omics:* (Full Access)" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;" vertex="1" parent="iam-box">
+      <mxGeometry x="20" y="120" width="180" height="45" as="geometry"/>
+    </mxCell>
+    <mxCell id="role-analyst" value="HealthOmics-SAML-Analyst&#xa;Get/List/StartRun/Tag" style="rounded=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" vertex="1" parent="iam-box">
+      <mxGeometry x="20" y="180" width="180" height="45" as="geometry"/>
+    </mxCell>
+    <mxCell id="role-readonly" value="HealthOmics-SAML-ReadOnly&#xa;Get/List Only" style="rounded=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" vertex="1" parent="iam-box">
+      <mxGeometry x="20" y="240" width="180" height="45" as="geometry"/>
+    </mxCell>
+
+    <!-- Service Role -->
+    <mxCell id="role-service" value="HealthOmics Service Role&#xa;(Confused Deputy Prevention)&#xa;SourceAccount + SourceArn" style="rounded=1;whiteSpace=wrap;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;" vertex="1" parent="iam-box">
+      <mxGeometry x="20" y="305" width="200" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- SourceIp badge -->
+    <mxCell id="sourceip" value="SourceIp:&#xa;10.0.0.0/16" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=9;fontStyle=1;size=0.15;" vertex="1" parent="iam-box">
+      <mxGeometry x="230" y="160" width="100" height="55" as="geometry"/>
+    </mxCell>
+
+    <!-- PassRole badge -->
+    <mxCell id="passrole" value="iam:PassRole&#xa;omics.amazonaws.com" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;size=0.15;" vertex="1" parent="iam-box">
+      <mxGeometry x="230" y="240" width="110" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- SAML to roles arrows -->
+    <mxCell id="e-saml-admin" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#82b366;" edge="1" parent="iam-box" source="saml-provider" target="role-admin">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e-saml-analyst" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#6c8ebf;" edge="1" parent="iam-box" source="saml-provider" target="role-analyst">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+    <mxCell id="e-saml-readonly" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#b85450;" edge="1" parent="iam-box" source="saml-provider" target="role-readonly">
+      <mxGeometry relative="1" as="geometry"/>
+    </mxCell>
+
+    <!-- VPC boundary -->
+    <mxCell id="vpc" value="VPC (10.0.0.0/16)" style="swimlane;startSize=30;fillColor=#E8F5E9;strokeColor=#4CAF50;fontStyle=1;fontSize=13;fontColor=#2E7D32;rounded=1;arcSize=5;container=1;pointerEvents=0;" vertex="1" parent="aws-cloud">
+      <mxGeometry x="420" y="50" width="770" height="540" as="geometry"/>
+    </mxCell>
+
+    <!-- Private Subnet 1 -->
+    <mxCell id="priv-sub1" value="Private Subnet (AZ-a, 10.0.1.0/24)" style="swimlane;startSize=22;fillColor=#C8E6C9;strokeColor=#4CAF50;fontStyle=0;fontSize=10;fontColor=#2E7D32;rounded=1;arcSize=8;container=1;pointerEvents=0;" vertex="1" parent="vpc">
+      <mxGeometry x="20" y="50" width="340" height="460" as="geometry"/>
+    </mxCell>
+
+    <!-- SageMaker Notebook -->
+    <mxCell id="sagemaker" value="SageMaker Notebook&#xa;ml.t3.medium&#xa;(No Internet)" style="rounded=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" vertex="1" parent="priv-sub1">
+      <mxGeometry x="30" y="40" width="160" height="65" as="geometry"/>
+    </mxCell>
+
+    <!-- Notebook details -->
+    <mxCell id="notebook-detail" value="boto3 omics client&#xa;SDK Test Notebook&#xa;healthomics-sdk-test.ipynb" style="rounded=1;whiteSpace=wrap;fillColor=#f5f5f5;strokeColor=#999999;fontSize=9;dashed=1;" vertex="1" parent="priv-sub1">
+      <mxGeometry x="30" y="125" width="160" height="55" as="geometry"/>
+    </mxCell>
+
+    <!-- ENIs for VPC Endpoints -->
+    <mxCell id="eni-label" value="VPC Endpoint ENIs (AZ-a)" style="text;fontSize=10;fontStyle=1;fontColor=#666666;fillColor=none;strokeColor=none;" vertex="1" parent="priv-sub1">
+      <mxGeometry x="20" y="200" width="180" height="20" as="geometry"/>
+    </mxCell>
+    <mxCell id="eni1" value="workflows-omics" style="rounded=1;whiteSpace=wrap;fillColor=#fff;strokeColor=#FF9800;fontSize=9;" vertex="1" parent="priv-sub1">
+      <mxGeometry x="20" y="225" width="130" height="28" as="geometry"/>
+    </mxCell>
+    <mxCell id="eni2" value="storage-omics" style="rounded=1;whiteSpace=wrap;fillColor=#fff;strokeColor=#FF9800;fontSize=9;" vertex="1" parent="priv-sub1">
+      <mxGeometry x="20" y="260" width="130" height="28" as="geometry"/>
+    </mxCell>
+    <mxCell id="eni3" value="analytics-omics" style="rounded=1;whiteSpace=wrap;fillColor=#fff;strokeColor=#FF9800;fontSize=9;" vertex="1" parent="priv-sub1">
+      <mxGeometry x="20" y="295" width="130" height="28" as="geometry"/>
+    </mxCell>
+    <mxCell id="eni4" value="tags-omics" style="rounded=1;whiteSpace=wrap;fillColor=#fff;strokeColor=#FF9800;fontSize=9;" vertex="1" parent="priv-sub1">
+      <mxGeometry x="20" y="330" width="130" height="28" as="geometry"/>
+    </mxCell>
+    <mxCell id="eni5" value="control-storage-omics" style="rounded=1;whiteSpace=wrap;fillColor=#fff;strokeColor=#FF9800;fontSize=9;" vertex="1" parent="priv-sub1">
+      <mxGeometry x="20" y="365" width="130" height="28" as="geometry"/>
+    </mxCell>
+
+    <!-- SG badge -->
+    <mxCell id="sg-badge" value="SG: TCP 443&#xa;from VPC CIDR" style="rounded=1;whiteSpace=wrap;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=9;fontStyle=1;" vertex="1" parent="priv-sub1">
+      <mxGeometry x="180" y="280" width="100" height="40" as="geometry"/>
+    </mxCell>
+
+    <!-- SageMaker to ENIs -->
+    <mxCell id="e-sm-eni" value="Private DNS&#xa;(TCP 443 / TLS 1.2+)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#FF9800;dashed=1;fontSize=9;" edge="1" parent="priv-sub1" source="sagemaker" target="eni1">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="110" y="195"/>
+          <mxPoint x="85" y="195"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Private Subnet 2 -->
+    <mxCell id="priv-sub2" value="Private Subnet (AZ-b, 10.0.2.0/24)" style="swimlane;startSize=22;fillColor=#C8E6C9;strokeColor=#4CAF50;fontStyle=0;fontSize=10;fontColor=#2E7D32;rounded=1;arcSize=8;container=1;pointerEvents=0;" vertex="1" parent="vpc">
+      <mxGeometry x="380" y="50" width="180" height="200" as="geometry"/>
+    </mxCell>
+
+    <!-- ENIs AZ-b -->
+    <mxCell id="eni-b-label" value="VPC Endpoint ENIs (AZ-b)&#xa;(redundancy)" style="text;fontSize=9;fontStyle=2;fontColor=#666666;fillColor=none;strokeColor=none;" vertex="1" parent="priv-sub2">
+      <mxGeometry x="10" y="30" width="160" height="30" as="geometry"/>
+    </mxCell>
+    <mxCell id="eni-b1" value="5x HealthOmics ENIs" style="rounded=1;whiteSpace=wrap;fillColor=#fff;strokeColor=#FF9800;fontSize=9;dashed=1;" vertex="1" parent="priv-sub2">
+      <mxGeometry x="20" y="70" width="140" height="35" as="geometry"/>
+    </mxCell>
+
+    <!-- HealthOmics Services -->
+    <mxCell id="omics-box" value="AWS HealthOmics" style="swimlane;startSize=25;fillColor=#FFE0B2;strokeColor=#FF9800;fontStyle=1;fontSize=12;fontColor=#E65100;rounded=1;arcSize=8;container=1;pointerEvents=0;" vertex="1" parent="vpc">
+      <mxGeometry x="380" y="280" width="370" height="240" as="geometry"/>
+    </mxCell>
+
+    <mxCell id="omics-workflows" value="Workflows&#xa;(Nextflow / WDL)" style="rounded=1;whiteSpace=wrap;fillColor=#FFE0B2;strokeColor=#FF9800;fontSize=10;fontStyle=1;" vertex="1" parent="omics-box">
+      <mxGeometry x="20" y="40" width="150" height="45" as="geometry"/>
+    </mxCell>
+    <mxCell id="omics-storage" value="Sequence Store&#xa;Reference Store" style="shape=cylinder3;whiteSpace=wrap;fillColor=#FFE0B2;strokeColor=#FF9800;fontSize=10;size=12;" vertex="1" parent="omics-box">
+      <mxGeometry x="200" y="35" width="140" height="55" as="geometry"/>
+    </mxCell>
+    <mxCell id="omics-analytics" value="Variant Store&#xa;Annotation Store" style="shape=cylinder3;whiteSpace=wrap;fillColor=#FFE0B2;strokeColor=#FF9800;fontSize=10;size=12;" vertex="1" parent="omics-box">
+      <mxGeometry x="200" y="110" width="140" height="55" as="geometry"/>
+    </mxCell>
+    <mxCell id="omics-runs" value="Run Engine&#xa;(StartRun / GetRun)" style="rounded=1;whiteSpace=wrap;fillColor=#FFE0B2;strokeColor=#FF9800;fontSize=10;" vertex="1" parent="omics-box">
+      <mxGeometry x="20" y="110" width="150" height="45" as="geometry"/>
+    </mxCell>
+    <mxCell id="omics-tags" value="Tags / Resource Mgmt" style="rounded=1;whiteSpace=wrap;fillColor=#FFE0B2;strokeColor=#FF9800;fontSize=10;" vertex="1" parent="omics-box">
+      <mxGeometry x="20" y="180" width="150" height="35" as="geometry"/>
+    </mxCell>
+
+    <!-- Endpoint policy badge -->
+    <mxCell id="vpce-policy" value="VPC Endpoint Policy&#xa;Account-Restricted" style="rounded=1;whiteSpace=wrap;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=9;fontStyle=1;" vertex="1" parent="vpc">
+      <mxGeometry x="400" y="255" width="130" height="35" as="geometry"/>
+    </mxCell>
+
+    <!-- ENI to HealthOmics -->
+    <mxCell id="e-eni-omics" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#FF9800;strokeWidth=2;" edge="1" parent="vpc" source="eni1" target="omics-workflows">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="340" y="289"/>
+          <mxPoint x="340" y="343"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- S3 Gateway Endpoint -->
+    <mxCell id="s3-gw" value="S3 Gateway&#xa;Endpoint" style="rounded=1;whiteSpace=wrap;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;dashed=1;" vertex="1" parent="vpc">
+      <mxGeometry x="590" y="50" width="100" height="40" as="geometry"/>
+    </mxCell>
+
+    <!-- CloudTrail -->
+    <mxCell id="cloudtrail" value="CloudTrail&#xa;(Audit Logging)" style="rounded=1;whiteSpace=wrap;fillColor=#FCE4EC;strokeColor=#C62828;fontSize=11;fontStyle=1;" vertex="1" parent="aws-cloud">
+      <mxGeometry x="870" y="620" width="150" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- KMS -->
+    <mxCell id="kms" value="KMS&#xa;(AWS-owned keys)" style="rounded=1;whiteSpace=wrap;fillColor=#E8EAF6;strokeColor=#3F51B5;fontSize=10;fontStyle=1;" vertex="1" parent="aws-cloud">
+      <mxGeometry x="1060" y="620" width="130" height="50" as="geometry"/>
+    </mxCell>
+
+    <!-- S3 Bucket -->
+    <mxCell id="s3-bucket" value="S3 Bucket&#xa;(Workflow I/O)" style="shape=cylinder3;whiteSpace=wrap;fillColor=#f5f5f5;strokeColor=#666666;fontSize=10;size=12;" vertex="1" parent="aws-cloud">
+      <mxGeometry x="680" y="620" width="130" height="55" as="geometry"/>
+    </mxCell>
+
+    <!-- CloudTrail to HealthOmics -->
+    <mxCell id="e-ct-omics" value="API Event Logging" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#C62828;dashed=1;fontSize=9;" edge="1" parent="aws-cloud" source="cloudtrail" target="omics-box">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="945" y="610"/>
+          <mxPoint x="945" y="580"/>
+          <mxPoint x="985" y="580"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Keycloak (External) -->
+    <mxCell id="keycloak" value="Keycloak Mock IdP&#xa;(Azure Entra ID Replacement)&#xa;HTTPS :8443" style="rounded=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+      <mxGeometry x="40" y="200" width="220" height="70" as="geometry"/>
+    </mxCell>
+
+    <!-- Keycloak features -->
+    <mxCell id="kc-saml" value="SAML 2.0 + Assertion Encryption" style="rounded=1;whiteSpace=wrap;fillColor=#fff;strokeColor=#b85450;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="40" y="290" width="220" height="28" as="geometry"/>
+    </mxCell>
+    <mxCell id="kc-mfa" value="MFA: TOTP Required" style="rounded=1;whiteSpace=wrap;fillColor=#fff;strokeColor=#b85450;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="40" y="325" width="220" height="28" as="geometry"/>
+    </mxCell>
+    <mxCell id="kc-users" value="Users: admin / analyst / readonly" style="rounded=1;whiteSpace=wrap;fillColor=#fff;strokeColor=#b85450;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="40" y="360" width="220" height="28" as="geometry"/>
+    </mxCell>
+    <mxCell id="kc-tls" value="TLS (Self-signed), HTTP Disabled" style="rounded=1;whiteSpace=wrap;fillColor=#fff;strokeColor=#b85450;fontSize=9;" vertex="1" parent="1">
+      <mxGeometry x="40" y="395" width="220" height="28" as="geometry"/>
+    </mxCell>
+
+    <!-- Keycloak to SAML Provider -->
+    <mxCell id="e-kc-saml" value="SAML 2.0&#xa;(HTTPS, Encrypted)" style="edgeStyle=orthogonalEdgeStyle;rounded=1;strokeColor=#b85450;strokeWidth=2;fontSize=10;fontStyle=1;" edge="1" parent="1" source="keycloak" target="saml-provider">
+      <mxGeometry relative="1" as="geometry">
+        <Array as="points">
+          <mxPoint x="300" y="235"/>
+          <mxPoint x="300" y="195"/>
+        </Array>
+      </mxGeometry>
+    </mxCell>
+
+    <!-- Legend -->
+    <mxCell id="legend-box" value="Legend" style="swimlane;startSize=22;fillColor=#FAFAFA;strokeColor=#999999;fontStyle=1;fontSize=11;rounded=1;arcSize=8;container=1;pointerEvents=0;" vertex="1" parent="1">
+      <mxGeometry x="40" y="470" width="230" height="200" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg1" value=" Admin (Full Access)" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=9;align=left;spacingLeft=5;" vertex="1" parent="legend-box">
+      <mxGeometry x="10" y="30" width="210" height="22" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg2" value=" Analyst (Get/List/StartRun/Tag)" style="rounded=1;whiteSpace=wrap;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=9;align=left;spacingLeft=5;" vertex="1" parent="legend-box">
+      <mxGeometry x="10" y="58" width="210" height="22" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg3" value=" ReadOnly (Get/List Only)" style="rounded=1;whiteSpace=wrap;fillColor=#f8cecc;strokeColor=#b85450;fontSize=9;align=left;spacingLeft=5;" vertex="1" parent="legend-box">
+      <mxGeometry x="10" y="86" width="210" height="22" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg4" value=" VPC Endpoint (Interface)" style="rounded=1;whiteSpace=wrap;fillColor=#fff;strokeColor=#FF9800;fontSize=9;align=left;spacingLeft=5;" vertex="1" parent="legend-box">
+      <mxGeometry x="10" y="114" width="210" height="22" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg5" value=" Security (Encryption/Audit)" style="rounded=1;whiteSpace=wrap;fillColor=#FCE4EC;strokeColor=#C62828;fontSize=9;align=left;spacingLeft=5;" vertex="1" parent="legend-box">
+      <mxGeometry x="10" y="142" width="210" height="22" as="geometry"/>
+    </mxCell>
+    <mxCell id="leg6" value=" Confused Deputy Prevention" style="rounded=1;whiteSpace=wrap;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=9;align=left;spacingLeft=5;" vertex="1" parent="legend-box">
+      <mxGeometry x="10" y="170" width="210" height="22" as="geometry"/>
+    </mxCell>
+
+    <!-- Validation badge -->
+    <mxCell id="badge" value="Validation: 13/13 Security Checks PASSED&#xa;RBAC API Test: 24/24 PASSED" style="rounded=1;whiteSpace=wrap;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=11;fontStyle=1;fontColor=#2E7D32;" vertex="1" parent="1">
+      <mxGeometry x="40" y="700" width="300" height="50" as="geometry"/>
+    </mxCell>
+
+  </root>
+</mxGraphModel>
